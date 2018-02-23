@@ -1,0 +1,23 @@
+---
+#
+# 2018 Becki True - my first crack at using Ansible to 
+# configure for CIS Benchmarks
+#
+
+   - include: section_01.yml
+   tags: section1
+
+   - include: section_02.yml
+   tags: section2
+
+   - include: section_03.yml
+   tags: section3
+
+   - include: section_04.yml
+   tags: section4
+
+   - include: section_05.yml
+   tags: section5
+
+   - include: section_06.yml
+   tags: section6
