@@ -4,13 +4,9 @@
 #
 # Section 1 of the CIS Amazon Linux Benchmark is File System Configuration
 #
+# There are not level 2 benchmarks in this section
 
 - import_tasks: section_01_level1.yml
   tags:
      - section1
      - level1
-
-- import_tasks: section_01_level2.yml
-  tags:
-     - section1
-     - level2
