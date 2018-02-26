@@ -7,17 +7,17 @@
 - import_tasks: section_01.yml
   tags: section1
 
-- import_tasks: section_02.yml
-  tags: section2
+#- import_tasks: section_02.yml
+#  tags: section2
 
-- import_tasks: section_03.yml
-  tags: section3
+#- import_tasks: section_03.yml
+#  tags: section3
 
-- import_tasks: section_04.yml
-  tags: section4
+#- import_tasks: section_04.yml
+#  tags: section4
 
-- import_tasks: section_05.yml
-  tags: section5
+#- import_tasks: section_05.yml
+#  tags: section5
 
-- import_tasks: section_06.yml
-  tags: section6
+#- import_tasks: section_06.yml
+#  tags: section6
