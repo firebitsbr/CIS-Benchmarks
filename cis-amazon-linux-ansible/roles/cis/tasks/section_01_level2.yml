@@ -1,0 +1,27 @@
+---
+# These are Section 1 Level 2 tasks. They can break things on a running server
+# Use with caution
+  - name: 1.1.2 Create Separate Partition for /tmp in /etc/fstab (Scored)
+    mount:
+      src: /tmp
+      path: /
+      state: present
+      fstype: tmpfs
+      opts: "nodev,nosuid,noexec"
+    tags:
+      - scored
+      - section1.1
+      - section1.1.2
+      - level2
+  - name: 1.1.6 Create a Separate Partition for /var in /etc/fstab (Scored)
+    mount:
+      src: /var
+      path: /
+      state: present
+      fstype: ext4
+      opts: "rw,relatime,data=ordered"
+    tags:
+      - scored
+      - section1.1
+      - section1.1.6
+      - level2
