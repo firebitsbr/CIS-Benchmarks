@@ -221,8 +221,8 @@
        - section1.1.1.8
        - level1
        - cis_control13
-  - name: 1.1.3 - 1.1.5 Ensure nodev, nosuid, noexec options set on /tmp partition if it exists (Scored)
-    shell: cat /etc/fstab | grep '^.*\s/tmp\{1\}' 
+  - name: 1.1.3 - 1.1.5 see if /tmp partition exists
+    shell: grep '^.*\s/tmp\{1\}' /etc/fstab
     register: tmp_partition_result
     ignore_errors: yes
     tags:
@@ -232,8 +232,11 @@
       - section1.1.4
       - section1.1.5
       - level1
-  - name: 1.1.3 - 1.1.5  manually update /etc/fstab
-    debug: msg="manually updating /etc/fstab to ensure nodev, nosuid, noexec options are configured for /tmp - need to run mount"
+      - cis_control2
+  - name: 1.1.3 - 1.1.5 Ensure nodev, nosuid, noexec options set on /tmp partition if it exists (Scored)
+    shell: grep -P '^(?=.*^.*\s/tmp)(?=.*rw,nosuid,nodev,noexec,relatime)' /etc/fstab  
+    register: tmp_opts_result
+    ignore_errors: yes
     when: "tmp_partition_result.rc == 0"
     tags:
       - scored
@@ -242,26 +245,30 @@
       - section1.1.4
       - section1.1.5
       - level1
-  - name: 1.1.3 - 1.1.5 update /etc/fstab with nodev, nosuid, noexec options for /tmp partition
+      - cis_control2
+  - name: 1.1.3 - 1.1.5  manually update /etc/fstab
+    debug: msg="manually updating /etc/fstab to ensure nodev, nosuid, noexec options are configured for /tmp"
+    when: 
+      - "tmp_partition_result.rc == 0"
+      - "tmp_opts_result.rc == 0"
+    tags:
+      - scored
+      - section1.1
+      - section1.1.3
+      - section1.1.4
+      - section1.1.5
+      - level1
+      - cis_control2
+  - name: 1.1.3 - 1.1.5 update /etc/fstab with nodev, nosuid, noexec options for /tmp partition and remount it
     mount:
       src: tmpfs
       path: /tmp
-      state: present
+      state: mounted
       fstype: tmpfs
       opts: "rw,nosuid,nodev,noexec,relatime"
-    when: "tmp_partition_result.rc == 0"
-    tags:
-      - scored
-      - section1.1
-      - section1.1.3
-      - section1.1.4
-      - section1.1.5
-      - level1
-  - name: 1.1.3 - 1.1.5 remount /tmp partition
-    command:  mount -o remount,nodev,nosuid,noexec /tmp
-    when:
+    when: 
       - "tmp_partition_result.rc == 0"
-      - tmp_mount.rc == 0"
+      - "tmp_opts_result.rc == 1"
     tags:
       - scored
       - section1.1
@@ -269,8 +276,9 @@
       - section1.1.4
       - section1.1.5
       - level1
-  - name: 1.1.8 - 1.1.10  Ensure nodev, nosuid, noexec options set on /var/tmp partition if it exists (Scored)
-    shell: cat /etc/fstab | grep /var/tmp
+      - cis_control2
+  - name: 1.1.8 - 1.1.10 see if /var/tmp partition exists
+    shell: grep '^.*\s/var/var/tmp\{1\}' /etc/fstab
     register: vartmp_partition_result
     ignore_errors: yes
     tags:
@@ -280,8 +288,11 @@
       - section1.1.9
       - section1.1.10
       - level1
-  - name: 1.1.8 - 1.1.10 manually update /etc/fstab
-    debug: msg="manually updating /etc/fstab to ensure nodev, nosuid, noexec options are configured for /tmp"
+      - cis_control2
+  - name: 1.1.8 - 1.1.10  Ensure nodev, nosuid, noexec options set on /var/tmp partition if it exists (Scored)
+    shell: grep -P '^(?=.*^.*\s/var/tmp)(?=.*rw,nosuid,nodev,noexec,relatime)' /etc/fstab
+    register: vartmp_opts_result
+    ignore_errors: yes
     when: "vartmp_partition_result.rc == 0"
     tags:
       - scored
@@ -290,27 +301,30 @@
       - section1.1.9
       - section1.1.10
       - level1
-  - name: 1.1.8 - 1.1.10 update /etc/fstab with nodev, nosuid, noexec options for /var/tmp partition
+      - cis_control2
+  - name: 1.1.8 - 1.1.10 manually update /etc/fstab
+    debug: msg="manually updating /etc/fstab to ensure nodev, nosuid, noexec options are configured for /var/tmp"
+    when: 
+      - "vartmp_partition_result.rc == 0"
+      - "vartmp_opts_result.rc == 0"
+    tags:
+      - scored
+      - section1.1
+      - section1.1.8
+      - section1.1.9
+      - section1.1.10
+      - level1
+      - cis_control2
+  - name: 1.1.8 - 1.1.10 update /etc/fstab with nodev, nosuid, noexec options for /var/tmp partition and remount it
     mount:
       src: /tmp
       path: /var/tmp
-      state: present
+      state: mounted
       fstype: none
       opts: "rw,nosuid,nodev,noexec,relatime"
-    register: tmpvar_mount
-    when: "vartmp_partition_result.rc == 0"
-    tags:
-      - scored
-      - section1.1
-      - section1.1.8
-      - section1.1.9
-      - section1.1.10
-      - level1
-  - name: 1.1.8 - 1.1.10 remount /var/tmp partition
-    command:  mount -o remount,nodev,nosuid,noexec /var/tmp
     when: 
       - "vartmp_partition_result.rc == 0"
-      - "tmpvar_mount.rc == 0"
+      - "vartmp_opts_result.rc == 1"
     tags:
       - scored
       - section1.1
@@ -318,3 +332,84 @@
       - section1.1.9
       - section1.1.10
       - level1
+      - cis_control2
+  - name: see if /home partition exists
+    shell: grep '^.*\s/var/home\{1\}' /etc/fstab
+    register: home_partition_result
+    ignore_errors: yes
+    tags:
+      - scored
+      - section1.1
+      - section1.1.14
+      - level1
+      - cis_control2
+  - name: 1.1.14 Ensure nodev option set on /home partition if it exists (Scored)
+    shell: grep -P '^(?=.*^.*\s/home)(?=.*nodev)' /etc/fstab
+    register: home_opts_result
+    ignore_errors: yes
+    when: "home_partition_result.rc == 0"
+    tags:
+      - scored
+      - section1.1
+      - section1.1.14
+      - level1
+      - cis_control2
+  - name: 1.1.14 update /etc/fstab with nodev on /home partition and remount it
+    mount:
+      src: /dev/xvda1
+      path: /home
+      state: mounted
+      fstype: ext4
+      opts: "rw,nodev,relatime,data=ordered"
+    when: 
+      - "home_partition_result.rc == 0"
+      - "home_opts_result.rc == 1"
+    tags: 
+      - scored
+      - section1.1 
+      - section1.1.14
+      - level1
+      - cis_control2
+  - name: see if /dev/shm partition exists
+    shell: grep '^.*\s/dev/shm\{1\}' /etc/fstab
+    register: devshm_partition_result
+    ignore_errors: yes
+    tags:
+      - scored   
+      - section1.1
+      - section1.1.15
+      - section1.1.16
+      - section1.1.17
+      - level1
+      - cis_control2
+  - name: 1.1.15 - 1.1.17 Ensure nodev, nosuid, noexec options are set on /dev/shm partition if it exists (Scored)
+    shell: grep -P '^(?=.*^.*\s/dev/shm)(?=.*rw,nosuid,nodev,noexec,relatime)' /etc/fstab
+    register: devshm_opts_result
+    ignore_errors: yes
+    when: "devshm_partition_result.rc == 0"
+    tags:
+      - scored
+      - section1.1
+      - section1.1.15
+      - section1.1.16
+      - section1.1.17
+      - level1
+      - cis_control2
+  - name: 1.1.15 - 1.1.17 update /etc/fstab with nodev on /dev/shm partition and remount it
+    mount:
+      src: tmpfs
+      path: /dev/shm
+      state: mounted
+      fstype: tmpfs
+      opts: "rw,nosuid,nodev,noexec,relatime"
+    when: 
+      - "devshm_partition_result.rc == 0"
+      - "devshm_opts_result.rc == 1"
+    tags:
+      - scored    
+      - section1.1
+      - section1.1.15
+      - section1.1.16
+      - section1.1.17
+      - level1
+      - cis_control2
